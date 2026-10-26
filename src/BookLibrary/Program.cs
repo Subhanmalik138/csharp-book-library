@@ -1,3 +1,3 @@
-// Placeholder until the CLI lands in the next stage.
-Console.WriteLine("BookLibrary — personal book library manager (CLI coming next).");
-return 0;
+using BookLibrary;
+
+return new BookCli(Console.Out, Console.In).Run(args);
