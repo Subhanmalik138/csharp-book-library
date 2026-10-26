@@ -40,16 +40,20 @@ public sealed class Book
             throw new ArgumentException("Total pages cannot be negative.");
         if (CurrentPage < 0 || CurrentPage > TotalPages)
             throw new ArgumentException("Current page must be between 0 and total pages.");
-        if (Rating is < 1 or > 5)
+        if (Rating is not null && (Rating < 1 || Rating > 5))
             throw new ArgumentException("Rating must be between 1 and 5.");
-        if (Year is < 0 or > DateTime.UtcNow.Year + 1)
+        if (Year is not null && (Year < 0 || Year > DateTime.UtcNow.Year + 1))
             throw new ArgumentException("Year is out of range.");
         if (Status == ReadingStatus.Finished && FinishedOn is null)
             throw new ArgumentException("A finished book needs a finish date.");
         if (FinishedOn is not null && StartedOn is not null && FinishedOn < StartedOn)
             throw new ArgumentException("Finish date cannot be before the start date.");
-        if (Isbn is not null && Isbn.Replace("-", "").Replace(" ", "").Length is not (10 or 13))
-            throw new ArgumentException("ISBN must be 10 or 13 digits (dashes allowed).");
+        if (Isbn is not null)
+        {
+            var digits = Isbn.Replace("-", "").Replace(" ", "");
+            if (digits.Length != 10 && digits.Length != 13)
+                throw new ArgumentException("ISBN must be 10 or 13 digits (dashes allowed).");
+        }
     }
 
     /// <summary>
