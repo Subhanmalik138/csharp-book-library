@@ -149,6 +149,25 @@ public sealed class BookCli
                 _out.WriteLine($"Updated: \"{book.Title}\"");
                 return true;
             }
+            case "export":
+            {
+                if (pos.Count == 0) throw new ArgumentException("Usage: export <path> [--format json|csv]");
+                var format = (Opt(opts, "format") ?? (pos[0].EndsWith(".csv", StringComparison.OrdinalIgnoreCase) ? "csv" : "json")).ToLowerInvariant();
+                var text = format == "csv" ? DataExchange.ToCsv(library) : DataExchange.ToJson(library, goal);
+                File.WriteAllText(pos[0], text);
+                _out.WriteLine($"Exported {library.Books.Count} books to {pos[0]} ({format})");
+                return false;
+            }
+            case "import":
+            {
+                if (pos.Count == 0) throw new ArgumentException("Usage: import <path> [--format json|csv]");
+                var format = (Opt(opts, "format") ?? (pos[0].EndsWith(".csv", StringComparison.OrdinalIgnoreCase) ? "csv" : "json")).ToLowerInvariant();
+                var text = File.ReadAllText(pos[0]);
+                var result = format == "csv" ? DataExchange.ImportCsv(library, text) : DataExchange.ImportJson(library, text);
+                if (result.Goal is not null && goal is null) goal = result.Goal;
+                _out.WriteLine($"Imported {result.Added} books, skipped {result.Skipped} duplicates.");
+                return result.Added > 0 || (result.Goal is not null && goal == result.Goal);
+            }
             case "stats":
             {
                 PrintStats(library);
@@ -279,6 +298,8 @@ public sealed class BookCli
               remove <id> [--force]
               stats
               goal [set <books> [--year <year>] | clear]
+              export <path> [--format json|csv]
+              import <path> [--format json|csv]
 
             Data lives in ~/.booklibrary/books.json;
             override the full path with BOOKLIBRARY_DATA.
