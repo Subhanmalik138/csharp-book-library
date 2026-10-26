@@ -69,6 +69,7 @@ public sealed class Book
         if (TotalPages > 0 && page >= TotalPages)
         {
             Status = ReadingStatus.Finished;
+            StartedOn ??= today;
             FinishedOn ??= today;
         }
         else if (Status == ReadingStatus.WantToRead)
